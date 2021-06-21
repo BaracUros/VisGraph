@@ -23,40 +23,31 @@ class VisGraph:
     
     def get_graph(self):
         
-        for i in range(len(self.time)):
-            for j in range(i + 1, len(self.time), 1):
-                
-                if j == i + 1:
-                    if self.directed == True:
-                        if self.mag[i] > self.mag[j]:
-                            self.graph .add_edge(i, j)
-                        elif self.mag[i] == self.mag[j]:
-                            self.graph .add_edge(i, j)
-                        else:
-                            self.graph .add_edge(j, i)
-                    else:
-                        self.graph .add_edge(i, j)
+        if self.directed == True:
+            for i in range(len(self.mag) - 1):
+                if (self.mag[i + 1] - self.mag[i]) / (self.time[i + 1] - self.time[i]) > 0:
+                    self.graph.add_edge(i + 1, i)
                 else:
-                    connect = True
-                    if self.directed == True:
-                        for k in range(i +1, j, 1):
-                            if self.mag[k] > self.mag[j] + (self.mag[i] - self.mag[j]) * (self.time[j] - self.time[k]) / (self.time[j] - self.time[i]):
-                                connect = False
-                                break
-                        if connect == True:
-                            if self.mag[i] > self.mag[j]:
-                                self.graph .add_edge(i, j)
-                            elif self.mag[i] == self.mag[j]:
-                                self.graph .add_edge(i, j)
-                            else:
-                                self.graph .add_edge(j, i)
-                    else:
-                        for k in range(i +1, j, 1):
-                            if self.mag[k] > self.mag[j] + (self.mag[i] - self.mag[j]) * (self.time[j] - self.time[k]) / (self.time[j] - self.time[i]):
-                                connect = False
-                                break
-                        if connect == True:
-                            self.graph .add_edge(i, j)
+                    self.graph.add_edge(i, i + 1)
+            for i in range(len(self.mag)):
+                for j in range(i + 2, len(self.mag), 1):
+                    line = self.mag[j] + (self.mag[i] - self.mag[j]) * (self.time[j] - self.time[i + 1:j]) / (self.time[j] - self.time[i])
+                    values = self.mag[i + 1:j]
+                    if np.all(line - values > 0):
+                        if self.mag[j] > self.mag[i]:
+                            self.graph.add_edge(j, i)
+                        else:
+                            self.graph.add_edge(i, j)
+        else:
+            for i in range(len(self.mag) - 1):
+                self.graph.add_edge(i, i + 1)
+            for i in range(len(self.mag)):
+                for j in range(i + 2, len(self.mag), 1):
+                    line = self.mag[j] + (self.mag[i] - self.mag[j]) * (self.time[j] - self.time[i + 1:j]) / (self.time[j] - self.time[i])
+                    values = self.mag[i + 1:j]
+                    if np.all(line - values > 0):
+                        self.graph.add_edge(i, j)
+                  
         return self.graph
 
 
